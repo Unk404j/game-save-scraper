@@ -43,3 +43,4 @@ Pour exécuter le script, il suffit de l'exécuter dans un terminal :
 ## Exemple :
 Si tu exécutes le script et entres l'URL suivante :
 ```https://www.pcgamingwiki.com/wiki/Game_Name```
+Le script créera un fichier Game_Name.txt dans le répertoire actuel contenant les chemins de sauvegarde extraits.
