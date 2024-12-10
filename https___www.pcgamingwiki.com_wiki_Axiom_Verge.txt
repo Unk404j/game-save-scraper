@@ -1,1 +1,0 @@
-['%USERPROFILE%\\Documents\\SavedGames\\AxiomVerge\\Saves\\', '<Steam-folder>\\userdata\\<user-id>\\332200\\remote\\', '', '']

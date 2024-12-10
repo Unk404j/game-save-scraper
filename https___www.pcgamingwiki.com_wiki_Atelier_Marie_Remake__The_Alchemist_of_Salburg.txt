@@ -1,1 +1,0 @@
-['%USERPROFILE%\\Documents\\KoeiTecmo\\Atelier Marie Remake', '<SteamLibrary-folder>/steamapps/compatdata/2138090/pfx/[Note 2]']

@@ -1,11 +1,11 @@
-# Ignorer tous les fichiers .txt
-*.txt
-
-# Ignorer les fichiers de log
-*.log
-
-# Ignorer les fichiers temporaires
-*.tmp
-
-# Ignorer les fichiers pngs
-*.png
+## Ignorer tous les fichiers .txt
+#*.txt
+#
+## Ignorer les fichiers de log
+#*.log
+#
+## Ignorer les fichiers temporaires
+#*.tmp
+#
+## Ignorer les fichiers pngs
+#*.png
