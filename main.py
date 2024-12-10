@@ -4,8 +4,9 @@ from playwright.async_api import async_playwright  # Importation de la biblioth�
 import re  # Importation de la bibliothèque re pour manipuler les chaînes de caractères
 
 # Informations d'authentification pour se connecter à un proxy de scraping
-AUTH = 'brd-customer-hl_f873ba8f-zone-scraping_browser1:kmv62akub0q9'
-SBR_WS_CDP = f'https://{AUTH}@brd.superproxy.io:9222'
+# AUTH = 'brd-customer-hl_f873ba8f-zone-scraping_browser1:kmv62akub0q9'
+# Exemple avec un proxy anonyme
+SBR_WS_CDP = 'localhost'
 
 # Demande à l'utilisateur d'entrer l'URL d'une page de jeu sur PCGamingWiki
 url = input("Entrez l'url du jeu :\n")
@@ -34,11 +35,11 @@ def sanitize_filename(url):
 
 # Fonction principale pour exécuter le processus de scraping
 async def run(pw):
-    print('Connecting to Scraping Browser...')
-    browser = await pw.chromium.connect_over_cdp(SBR_WS_CDP)
+    print('Launching browser...')
+    browser = await pw.chromium.launch(headless=False)  # Lance le navigateur en mode non headless
     try:
         page = await browser.new_page()
-        print('Connected! Navigating to webpage')
+        print('Navigating to webpage')
 
         await page.goto(url)
 
@@ -48,13 +49,13 @@ async def run(pw):
 
         print(savepaths)
 
-        # Utilisation de la fonction sanitize_filename pour obtenir un nom de fichier valide
         filename = sanitize_filename(url)
 
         with open(filename, "w", encoding="utf-8") as f:
             f.write(str(savepaths))
     finally:
         await browser.close()
+
 
 # Fonction principale d'exécution asynchrone
 async def main():
