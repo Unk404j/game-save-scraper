@@ -15,10 +15,13 @@ Tu peux installer les dépendances nécessaires via `pip` en exécutant la comma
 
 ```bash
 pip install playwright beautifulsoup4 html5lib
-
+```
 Une fois les dépendances installées, tu dois également installer les navigateurs nécessaires pour Playwright. Exécute la commande suivante :
 
 ```bash
 python -m playwright install
-
+```
 ## Fonctionnement
+Le script récupère les chemins de sauvegarde associés à un jeu vidéo depuis la page de son article sur** PCGamingWiki**. L'utilisateur entre l'URL du jeu, et le script extrait les informations de la page correspondant à cette URL.
+
+## Étapes :
