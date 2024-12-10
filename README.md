@@ -1,89 +1,46 @@
-# Scraping Tool for PCGamingWiki
+# Scraper PCGamingWiki
 
-## Description
-
-Ce projet est un outil de scraping écrit en Python qui permet de récupérer des informations sur les chemins de sauvegarde de jeux vidéo depuis le site [PCGamingWiki](https://www.pcgamingwiki.com). Il utilise des bibliothèques comme `BeautifulSoup`, `Playwright`, et `asyncio` pour naviguer, extraire et sauvegarder les données de manière asynchrone.
-
-## Fonctionnalités
-
-- Extraction des chemins de sauvegarde des jeux vidéo depuis PCGamingWiki.
-- Utilisation de Playwright pour la navigation rapide et asynchrone des pages web.
-- Sauvegarde des informations extraites dans des fichiers texte pour chaque jeu.
-- Interface utilisateur simple avec saisie d'URL pour spécifier le jeu.
+Ce script permet de récupérer les chemins de sauvegarde des jeux vidéo présents sur le site **PCGamingWiki**. Il utilise **Playwright** pour naviguer de manière asynchrone dans un navigateur web et **BeautifulSoup** pour analyser et extraire les données de la page.
 
 ## Prérequis
 
-Avant de commencer, vous devez avoir les outils suivants installés :
+- Python 3.7 ou supérieur.
+- Bibliothèques Python suivantes :
+  - `playwright`
+  - `beautifulsoup4`
+  - `html5lib`
+  - `re`
 
-- [Python 3.7+](https://www.python.org/downloads/)
-- [pip](https://pip.pypa.io/en/stable/), pour installer les packages Python
-- [Node.js](https://nodejs.org/), nécessaire pour exécuter Playwright
+Tu peux installer les dépendances nécessaires via `pip` en exécutant la commande suivante :
 
-## Installation
+```bash
+pip install playwright beautifulsoup4 html5lib
+```
+Une fois les dépendances installées, tu dois également installer les navigateurs nécessaires pour Playwright. Exécute la commande suivante :
 
-1. Clonez le dépôt :
-    ```bash
-    git clone https://github.com/Unk404j/scrapping-tool.git
-    cd scrapping-tool
-    ```
+```bash
+python -m playwright install
+```
+## Fonctionnement
+Le script récupère les chemins de sauvegarde associés à un jeu vidéo depuis la page de son article sur** PCGamingWiki**. L'utilisateur entre l'URL du jeu, et le script extrait les informations de la page correspondant à cette URL.
 
-2. Installez les dépendances Python :
-    ```bash
-    pip install -r requirements.txt
-    ```
+## Étapes :
+1. L'utilisateur entre l'URL d'un jeu PCGamingWiki dans le terminal.
+2. Le script lance un navigateur Chromium en mode non headless (avec interface graphique) pour charger la page.
+3. Le script recherche les données de sauvegarde du jeu dans le HTML de la page à l'aide de BeautifulSoup.
+4. Il extrait et affiche les chemins de sauvegarde trouvés, puis les écrit dans un fichier texte dont le nom est basé sur l'URL du jeu.
 
-3. Installez Playwright :
-    ```bash
-    playwright install
-    ```
+# Fonctionnalités
+## Fonction principale
+- ```run(pw)``` : Gère le processus de scraping, en lançant un navigateur et en naviguant vers l'URL fournie. Il récupère ensuite le contenu HTML de la page, extrait les informations de sauvegarde et les écrit dans un fichier.
+## Nettoyage des noms de fichier
+```sanitize_filename(url)``` : Cette fonction nettoie l'URL fournie pour la convertir en un nom de fichier valide. Elle remplace les caractères non autorisés par des underscores (```_```).
 
-## Utilisation
+# Exécution du script
+Pour exécuter le script, il suffit de l'exécuter dans un terminal :
+```python scraper.py```
 
-1. Exécutez le script Python `main.py` pour démarrer le processus de scraping :
-    ```bash
-    python main.py
-    ```
-
-2. Lors de l'exécution, le programme vous demandera de saisir l'URL d'un jeu sur PCGamingWiki.
-
-3. Le script extraiera les chemins de sauvegarde disponibles pour ce jeu et les enregistrera dans un fichier texte portant le nom de l'URL du jeu.
-
-4. Le fichier `.txt` sera créé dans le même répertoire où vous avez exécuté le script.
-
-## Contribuer
-
-Les contributions sont les bienvenues ! Si vous souhaitez améliorer ce projet ou ajouter des fonctionnalités, voici comment procéder :
-
-1. Forkez le projet.
-2. Créez une nouvelle branche pour votre fonctionnalité :
-    ```bash
-    git checkout -b ma-nouvelle-fonctionnalité
-    ```
-3. Commitez vos modifications :
-    ```bash
-    git commit -am 'Ajout de ma nouvelle fonctionnalité'
-    ```
-4. Poussez vos modifications sur votre fork :
-    ```bash
-    git push origin ma-nouvelle-fonctionnalité
-    ```
-5. Ouvrez une pull request sur le dépôt original pour que nous puissions réviser vos modifications.
-
-## Auteurs
-
-- **Unk404j** - _Développeur principal_ - [Unk404j GitHub](https://github.com/Unk404j)
-
-## License
-
-Ce projet est sous **Licence MIT** - voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-MIT License
-
-Copyright (c) 2024 Unk404j
-
-Permission est accordée, gratuitement, à toute personne obtenant une copie de ce logiciel et des fichiers associés, de traiter dans le logiciel sans restriction, y compris les droits de l'utiliser, de le copier, de le modifier, de le fusionner, de le publier, de le distribuer, de le sous-licencier et/ou de le vendre, sous réserve des conditions suivantes :
-
-L'avis de droit d'auteur ci-dessus et cet avis de permission doivent être inclus dans toutes les copies ou parties substantielles du logiciel.
-
-LE LOGICIEL EST FOURNI "EN L'ÉTAT", SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU IMPLICITE, Y COMPRIS MAIS SANS S'Y LIMITER AUX GARANTIES DE QUALITÉ MARCHANDE, D'ADAPTATION À UN USAGE PARTICULIER ET DE NON-VIOLATION. EN AUCUN CAS LES AUTEURS OU DÉTENTEURS DU DROIT D'AUTEUR NE SERONT RESPONSABLES DE TOUTE RÉCLAMATION, DOMMAGE OU AUTRE RESPONSABILITÉ, QUE CE SOIT DANS UNE ACTION CONTRACTUELLE, DÉLICTUELLE OU AUTRE, DÉCOULANT DE, OUTRE OU EN RELATION AVEC LE LOGICIEL OU L'UTILISATION OU D'AUTRES ACTIONS DANS LE LOGICIEL.
-
+## Exemple :
+Si tu exécutes le script et entres l'URL suivante :
+```https://www.pcgamingwiki.com/wiki/Game_Name```
+Le script créera un fichier Game_Name.txt dans le répertoire actuel contenant les chemins de sauvegarde extraits.
