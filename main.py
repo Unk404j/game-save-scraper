@@ -3,10 +3,6 @@ from bs4 import BeautifulSoup  # Importation de BeautifulSoup pour analyser le c
 from playwright.async_api import async_playwright  # Importation de la bibliothèque Playwright pour contrôler un navigateur de manière asynchrone
 import re  # Importation de la bibliothèque re pour manipuler les chaînes de caractères
 
-# Informations d'authentification pour se connecter à un proxy de scraping
-# AUTH = 'brd-customer-hl_f873ba8f-zone-scraping_browser1:kmv62akub0q9'
-# Exemple avec un proxy anonyme
-SBR_WS_CDP = 'localhost'
 
 # Demande à l'utilisateur d'entrer l'URL d'une page de jeu sur PCGamingWiki
 url = input("Entrez l'url du jeu :\n")
