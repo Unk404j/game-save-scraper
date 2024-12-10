@@ -25,3 +25,21 @@ python -m playwright install
 Le script récupère les chemins de sauvegarde associés à un jeu vidéo depuis la page de son article sur** PCGamingWiki**. L'utilisateur entre l'URL du jeu, et le script extrait les informations de la page correspondant à cette URL.
 
 ## Étapes :
+1. L'utilisateur entre l'URL d'un jeu PCGamingWiki dans le terminal.
+2. Le script lance un navigateur Chromium en mode non headless (avec interface graphique) pour charger la page.
+3. Le script recherche les données de sauvegarde du jeu dans le HTML de la page à l'aide de BeautifulSoup.
+4. Il extrait et affiche les chemins de sauvegarde trouvés, puis les écrit dans un fichier texte dont le nom est basé sur l'URL du jeu.
+
+# Fonctionnalités
+## Fonction principale
+- ```run(pw)``` : Gère le processus de scraping, en lançant un navigateur et en naviguant vers l'URL fournie. Il récupère ensuite le contenu HTML de la page, extrait les informations de sauvegarde et les écrit dans un fichier.
+## Nettoyage des noms de fichier
+```sanitize_filename(url)``` : Cette fonction nettoie l'URL fournie pour la convertir en un nom de fichier valide. Elle remplace les caractères non autorisés par des underscores (```_```).
+
+# Exécution du script
+Pour exécuter le script, il suffit de l'exécuter dans un terminal :
+```python scraper.py```
+
+## Exemple :
+Si tu exécutes le script et entres l'URL suivante :
+```https://www.pcgamingwiki.com/wiki/Game_Name```
