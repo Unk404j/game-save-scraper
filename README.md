@@ -1,46 +1,69 @@
-# Scraper PCGamingWiki
+# PCGamingWiki multi-game scraper
 
-Ce script permet de récupérer les chemins de sauvegarde des jeux vidéo présents sur le site **PCGamingWiki**. Il utilise **Playwright** pour naviguer de manière asynchrone dans un navigateur web et **BeautifulSoup** pour analyser et extraire les données de la page.
+This project scrapes [PCGamingWiki](https://www.pcgamingwiki.com/) to build a
+structured dataset of save game and configuration file locations for many
+games.  The scraper uses [Playwright](https://playwright.dev/) to retrieve
+pages and [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) to
+parse them.
 
-## Prérequis
+The dataset is exported to JSON, CSV and SQLite for use by future tools such
+as save-game managers.
 
-- Python 3.7 ou supérieur.
-- Bibliothèques Python suivantes :
-  - `playwright`
-  - `beautifulsoup4`
-  - `html5lib`
-  - `re`
-
-Tu peux installer les dépendances nécessaires via `pip` en exécutant la commande suivante :
+## Installation
 
 ```bash
-pip install playwright beautifulsoup4 html5lib
-```
-Une fois les dépendances installées, tu dois également installer les navigateurs nécessaires pour Playwright. Exécute la commande suivante :
-
-```bash
+pip install playwright beautifulsoup4 html5lib requests
 python -m playwright install
 ```
-## Fonctionnement
-Le script récupère les chemins de sauvegarde associés à un jeu vidéo depuis la page de son article sur** PCGamingWiki**. L'utilisateur entre l'URL du jeu, et le script extrait les informations de la page correspondant à cette URL.
 
-## Étapes :
-1. L'utilisateur entre l'URL d'un jeu PCGamingWiki dans le terminal.
-2. Le script lance un navigateur Chromium en mode non headless (avec interface graphique) pour charger la page.
-3. Le script recherche les données de sauvegarde du jeu dans le HTML de la page à l'aide de BeautifulSoup.
-4. Il extrait et affiche les chemins de sauvegarde trouvés, puis les écrit dans un fichier texte dont le nom est basé sur l'URL du jeu.
+## Usage
 
-# Fonctionnalités
-## Fonction principale
-- ```run(pw)``` : Gère le processus de scraping, en lançant un navigateur et en naviguant vers l'URL fournie. Il récupère ensuite le contenu HTML de la page, extrait les informations de sauvegarde et les écrit dans un fichier.
-## Nettoyage des noms de fichier
-```sanitize_filename(url)``` : Cette fonction nettoie l'URL fournie pour la convertir en un nom de fichier valide. Elle remplace les caractères non autorisés par des underscores (```_```).
+Three input modes are available:
 
-# Exécution du script
-Pour exécuter le script, il suffit de l'exécuter dans un terminal :
-```python scraper.py```
+```bash
+# Parse all games referenced in the sitemap
+python main.py --from-sitemap
 
-## Exemple :
-Si tu exécutes le script et entres l'URL suivante :
-```https://www.pcgamingwiki.com/wiki/Game_Name```
-Le script créera un fichier Game_Name.txt dans le répertoire actuel contenant les chemins de sauvegarde extraits.
+# Parse games listed inside a category
+python main.py --from-category "https://www.pcgamingwiki.com/wiki/Category:Windows_games"
+
+# Read game URLs from a text file
+python main.py --from-file games.txt
+```
+
+The scraper respects PCGamingWiki's robots.txt and performs requests with a
+rate limit of roughly one request per second.  Results are written to
+``dataset.json``, ``dataset.csv`` and ``dataset.sqlite``.
+
+## JSON schema
+
+Each game entry follows the schema below:
+
+```json
+{
+  "title": "Game Title",
+  "url": "https://www.pcgamingwiki.com/wiki/Game_Title",
+  "platforms": ["windows", "macos", "linux"],
+  "entries": [
+    {
+      "type": "save",                    // "save" or "config"
+      "os": "windows|macos|linux",
+      "variant": "steam|gog|epic|microsoft-store|origin|uplay|portable|default|other",
+      "path_raw": "%USERPROFILE%\\Saved Games\\Game\\...",
+      "notes": "Any notes from the table cell",
+      "source_section": "Save game data location"
+    }
+  ]
+}
+```
+
+Notes:
+* Environment variables and placeholders are kept as-is.
+* The scraper stores the section name from which each entry originates for
+  traceability.
+
+## Limitations
+
+The scraper is designed for educational purposes and makes a best effort to be
+polite: it implements retries with exponential backoff and logs all
+operations. Please avoid running it with high concurrency.
