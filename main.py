@@ -1,62 +1,85 @@
-import asyncio  # Importation de la bibliothèque asyncio pour gérer les appels asynchrones
-from bs4 import BeautifulSoup  # Importation de BeautifulSoup pour analyser le contenu HTML
-from playwright.async_api import async_playwright  # Importation de la bibliothèque Playwright pour contrôler un navigateur de manière asynchrone
-import re  # Importation de la bibliothèque re pour manipuler les chaînes de caractères
+"""Command line interface for the PCGamingWiki scraper.
+
+The scraper can obtain the list of game pages from three different input
+sources:
+
+* ``--from-sitemap``   – Parse the PCGamingWiki sitemap to list all games.
+* ``--from-category``  – Parse a specific category URL.
+* ``--from-file``      – Read a file containing one game URL per line.
+
+For each game the scraper extracts save and configuration file locations and
+writes the combined dataset to JSON, CSV and SQLite files.
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import logging
+from pathlib import Path
+from typing import List
+
+from playwright.async_api import async_playwright
+
+from pcgw import sources
+from pcgw.exporter import to_csv, to_json, to_sqlite
+from pcgw.scraper import RateLimiter, scrape_game
+
+DEFAULT_JSON = "dataset.json"
+DEFAULT_CSV = "dataset.csv"
+DEFAULT_SQLITE = "dataset.sqlite"
 
 
-# Demande à l'utilisateur d'entrer l'URL d'une page de jeu sur PCGamingWiki
-url = input("Entrez l'url du jeu :\n")
+async def scrape_all(urls: List[str]) -> List:
+    """Scrape all ``urls`` sequentially with rate limiting."""
 
-# Fonction pour extraire les chemins de sauvegarde depuis le HTML d'une page
-def extract_savepath(html):
-    bs = BeautifulSoup(html, 'html5lib')
-    headline = bs.find("span", class_="mw-headline", id="Save_game_data_location")
-
-    if headline:
-        container = headline.find_parent("h3").find_next("div", class_="container-pcgwikitable")
-        if container:
-            rows = container.find_all("tr", class_="template-infotable-body table-gamedata-body-row")
-            savepaths = []
-            for row in rows:
-                location_cell = row.find("td", class_="table-gamedata-body-location")
-                if location_cell:
-                    savepath = location_cell.get_text(strip=True)
-                    savepaths.append(savepath)
-            return savepaths
-    return []
-
-# Nettoyer l'URL pour créer un nom de fichier valide
-def sanitize_filename(url):
-    return re.sub(r'[<>:"/\\|?*]', '_', url) + ".txt"
-
-# Fonction principale pour exécuter le processus de scraping
-async def run(pw):
-    print('Launching browser...')
-    browser = await pw.chromium.launch(headless=False)  # Lance le navigateur en mode non headless
-    try:
-        page = await browser.new_page()
-        print('Navigating to webpage')
-
-        await page.goto(url)
-
-        html = await page.content()
-
-        savepaths = extract_savepath(html)
-
-        print(savepaths)
-
-        filename = sanitize_filename(url)
-
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(str(savepaths))
-    finally:
+    limiter = RateLimiter(rate=1.0)  # 1 request/second
+    results = []
+    async with async_playwright() as pw:
+        browser = await pw.firefox.launch(headless=True)
+        for url in urls:
+            try:
+                logging.info("Scraping %s", url)
+                game = await scrape_game(url, browser, limiter)
+                results.append(game)
+            except Exception as exc:  # pragma: no cover - network errors
+                logging.error("Failed to scrape %s: %s", url, exc)
         await browser.close()
+    return results
 
 
-# Fonction principale d'exécution asynchrone
-async def main():
-    async with async_playwright() as playwright:
-        await run(playwright)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="PCGamingWiki multi-game scraper")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--from-sitemap", action="store_true", help="Parse URLs from the sitemap")
+    group.add_argument("--from-category", metavar="URL", help="Parse URLs from a category page")
+    group.add_argument("--from-file", metavar="FILE", help="Read URLs from a file")
+    parser.add_argument("--output-json", default=DEFAULT_JSON)
+    parser.add_argument("--output-csv", default=DEFAULT_CSV)
+    parser.add_argument("--output-sqlite", default=DEFAULT_SQLITE)
+    args = parser.parse_args()
 
-if __name__ == '__main__':
-    asyncio.run(main())
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    if args.from_sitemap:
+        urls = sources.from_sitemap()
+    elif args.from_category:
+        urls = sources.from_category(args.from_category)
+    else:
+        urls = sources.from_file(args.from_file)
+
+    if not urls:
+        logging.error("No URLs to process")
+        return
+
+    games = asyncio.run(scrape_all(urls))
+
+    # export
+    to_json(games, args.output_json)
+    to_csv(games, args.output_csv)
+    to_sqlite(games, args.output_sqlite)
+    logging.info("Exported %d games", len(games))
+
+
+if __name__ == "__main__":
+    main()
